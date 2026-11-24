@@ -31,9 +31,27 @@ def a_geojson(df_, col_pred, col_conj):
 def construir_mapa(seleccion, solo_prueba, paso):
     lat, lon = datos["latitud"], datos["longitud"]
     m = folium.Map(location=[lat.mean(), lon.mean()], zoom_start=11,
-                   tiles=None, control_scale=True)          # sin mapa base
-    m.fit_bounds([[lat.min(), lon.min()], [lat.max(), lon.max()]])
+                   tiles=None, control_scale=True)
 
+    # Mapas base (sin llave de API)
+    folium.TileLayer(
+        tiles="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attr="© OpenStreetMap contributors", name="OpenStreetMap",
+        max_zoom=19, control=True,
+    ).add_to(m)
+    folium.TileLayer(
+        tiles="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        attr="© OpenStreetMap contributors © CARTO", name="CartoDB claro",
+        subdomains="abcd", max_zoom=19, show=False,
+    ).add_to(m)
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attr="Tiles © Esri", name="Satélite (Esri)", max_zoom=19, show=False,
+    ).add_to(m)
+    folium.TileLayer(tiles=None, name="Sin mapa base", attr=" ", show=False).add_to(m)
+
+    m.fit_bounds([[lat.min(), lon.min()], [lat.max(), lon.max()]])
+    
     # Calor por frecuencia
     capa = folium.FeatureGroup(name="Calor: frecuencia", show=True)
     HeatMap(list(zip(lat, lon)), radius=12, blur=15, min_opacity=0.3).add_to(capa)
